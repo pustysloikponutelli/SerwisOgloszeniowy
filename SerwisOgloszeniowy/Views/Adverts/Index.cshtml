@@ -1,0 +1,109 @@
+﻿@model PagedList.IPagedList<SerwisOgloszeniowy.Models.Advert>
+@using PagedList.Mvc;
+
+@{
+    ViewBag.Title = "Create";
+}
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+<div class="adverts">
+
+    <p>
+        @if (User.IsInRole("User") || User.IsInRole("Admin"))
+        {
+            @Html.ActionLink("Create New", "Create")
+        }
+    </p>
+
+    @using (Html.BeginForm())
+    {
+        <div>Tytuł: </div>
+        <div>@Html.TextBox("TitleSearch")</div>
+        <div>Opis: </div>
+        <div>@Html.TextBox("DescriptionSearch")</div>
+        <input type="submit" value="Szukaj" />
+    }
+
+    <table class="table">
+        <tr>
+            <th>
+                @Html.ActionLink("Id", "Index", new { sortOrder = ViewBag.IdSortParm })
+            </th>
+            <th>
+                @Html.ActionLink("Tytuł", "Index", new { sortOrder = ViewBag.TitleSortParm })
+            </th>
+
+            <th>
+                Zdjęcie
+            </th>
+
+            <th></th>
+        </tr>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Id)
+                </td>
+                <td>
+                    @Html.ActionLink(Html.DisplayFor(modelItem => item.Title).ToHtmlString(), "Details", new { id = item.Id })
+
+                </td>
+
+
+                @if (item.ImagePaths.Count > 0)
+                {
+                    <td>
+                        <img class="thumb" src="/Adverts/Download/?p=@(item.ImagePaths.First().Id + item.ImagePaths.First().Extension)&d=@item.ImagePaths.First().FileName">
+                    </td>
+                }
+                else
+                {
+                    <td>
+                        <img class="thumb" src="/Adverts/Download/?p=no-image.png">
+                    </td>
+                }
+                <td>
+                    @if (User.IsInRole("User"))
+                    {
+                        if (ViewBag.CurrentID == item.UserID)
+                        {
+                            @Html.ActionLink("Edytuj", "Edit", new { id = item.Id })
+                        }
+                    }
+                    @if (User.IsInRole("Admin"))
+                    {
+                        @Html.ActionLink("Edytuj", "Edit", new { id = item.Id })  
+                        <br/>
+                        @Html.ActionLink("Usuń", "Delete", new { id = item.Id })
+                     }
+                    
+                </td>
+            </tr>
+        }
+
+    </table>
+    <br /> Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+    @Html.PagedListPager(Model, page => Url.Action("Index", new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))
+</div>
+    <style>
+        .adverts p {
+            margin-top: 20px;
+        }
+        .adverts .thumb{
+            max-height: 50px;
+        }
+        .adverts form {
+            margin-top: 25px;
+
+        }
+        .adverts form div  {
+            float: left;
+            margin-right: 15px;
+            margin-bottom: 15px;
+        }
+    </style>
+
+
+
+
